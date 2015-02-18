@@ -1,4 +1,5 @@
 #coding: utf-8
+
 import time
 import random
 import sys
@@ -17,18 +18,33 @@ import libtcodpy as libtcod
 # 1.1 ########## Settings ############
 # Game
 SCREENWIDTH_X = 20
-SCREENHEIGHT_Y = 20
+SCREENHEIGHT_Y = 30
 GAME_SPEED = 300
-WINSCORE = 30
+WINSCORE = 3000
+# full list: [FigureT, FigureI, FigureLm, Figure L, FigureS, FigureSm, FigureSq]
 
-WEIGHT_T = 5
+FREQ_T = 3
+FREQ_I = 2
+FREQ_Lm = 3
+FREQ_L = 3
+FREQ_S = 5
+FREQ_Sm = 5
+FREQ_Sq = 3
+
 # Graphics
 LIMIT_FPS = 11
 
 # existed dots
 HEAP = []
-# score
+# score and prize for each figure
 SCORE = 0
+WEIGHT_T = 5
+WEIGHT_I = 1
+WEIGHT_Lm = 4
+WEIGHT_L = 4
+WEIGHT_S = 8
+WEIGHT_Sm = 8
+WEIGHT_Sq = 3
 # 1.2 ########## Settings init ############
 GAME_OVER = False
 
@@ -39,7 +55,6 @@ class Block(object):
     """basic self-propelled 1-d block"""
     # int x
     # int y
-
     def __init__(self, x, y):
         """
         :param x:
@@ -68,10 +83,7 @@ class Block(object):
 
 class Figure(object):
     """Parent of all figures"""
-    # ownBlocks = []
-    # copyblocks = []
     isRotated = 0
-    
     def move_left(self):
         copyblocks = copy_blocks(self.ownBlocks)
         for n in copyblocks:
@@ -80,7 +92,6 @@ class Figure(object):
             pass # add unpleasant sound
         else:
             self.ownBlocks = copyblocks
-
     def move_right(self):
         copyblocks = copy_blocks(self.ownBlocks)
         for n in copyblocks:
@@ -89,7 +100,6 @@ class Figure(object):
             pass # add unpleasant sound
         else:
             self.ownBlocks = copyblocks
-
     # used in putting it down
     def move_down(self):
         copyblocks = copy_blocks(self.ownBlocks)
@@ -100,13 +110,8 @@ class Figure(object):
         else:
             self.ownBlocks = copyblocks
 
- #   @abstractmethod
-  #  def rotate():
-
 # 2.2########## Different figures #######
-
 # __init__(self, x, y): and rotate(self): balance weight
-
 
 class FigureT(Figure):
     """docstring for FigureT"""
@@ -144,7 +149,199 @@ class FigureT(Figure):
             self.ownBlocks = list(copyblocks)
             self.isRotated = copyrot
 
+class FigureI(Figure):
+    """docstring for FigureI"""
+    weight = WEIGHT_I
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2-1, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+2, 0))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
 
+    def rotate(self):
+        copyblocks = copy_blocks(self.ownBlocks)
+        if (self.isRotated == 0):
+            copyblocks[0].move_up().move_right()
+            copyblocks[2].move_down().move_left()
+            copyblocks[3].move_down().move_down().move_left().move_left()
+            copyrot = 1
+        elif(self.isRotated == 1):
+            copyblocks[0].move_down().move_left()
+            copyblocks[2].move_up().move_right()
+            copyblocks[3].move_up().move_up().move_right().move_right()
+            copyrot = 0
+
+        if collision(copyblocks):
+            pass # add unpleasant sound
+        else:
+            self.ownBlocks = list(copyblocks)
+            self.isRotated = copyrot
+
+class FigureLm(Figure):
+    """docstring for FigureLm"""
+    weight = WEIGHT_Lm
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+2, 1))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
+
+    def rotate(self):
+        copyblocks = copy_blocks(self.ownBlocks)
+        if (self.isRotated == 0):
+            copyblocks[2].move_up()
+            copyblocks[3].move_down().move_left().move_left()
+            copyrot = 1
+        elif(self.isRotated == 1):
+            copyblocks[1].move_right().move_right().move_up()
+            copyblocks[3].move_right().move_right().move_up()
+            copyrot = 2
+        elif(self.isRotated == 2):
+            copyblocks[1].move_down().move_left()
+            copyblocks[3].move_down().move_left()
+            copyblocks[0].move_down().move_down()
+            copyrot = 3
+        else:
+            copyblocks[0].move_up().move_up()
+            copyblocks[1].move_left()
+            copyblocks[2].move_down()
+            copyblocks[3].move_up().move_right()
+
+            copyrot = 0
+
+        if collision(copyblocks):
+            pass # add unpleasant sound
+        else:
+            self.ownBlocks = list(copyblocks)
+            self.isRotated = copyrot
+
+class FigureL(Figure):
+    """docstring for FigureL"""
+    weight = WEIGHT_L
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2-1, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 0))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
+
+    def rotate(self):
+        copyblocks = copy_blocks(self.ownBlocks)
+        if (self.isRotated == 0):
+            copyblocks[0].move_down().move_right().move_right()
+            copyblocks[1].move_up()
+            copyrot = 1
+        elif(self.isRotated == 1):
+            copyblocks[0].move_left().move_left().move_up()
+            copyblocks[2].move_left().move_left().move_up()
+
+            copyrot = 2
+        elif(self.isRotated == 2):
+            copyblocks[1].move_down().move_down().move_left()
+            copyblocks[3].move_down().move_down().move_left()
+            copyrot = 3
+        else:
+            copyblocks[1].move_right().move_up()
+            copyblocks[2].move_right().move_right().move_down()
+            copyblocks[3].move_right().move_up().move_up()
+            copyrot = 0
+
+        if collision(copyblocks):
+            pass # add unpleasant sound
+        else:
+            self.ownBlocks = list(copyblocks)
+            self.isRotated = copyrot
+
+class FigureS(Figure):
+    """docstring for FigureS"""
+    weight = WEIGHT_S
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 2))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
+
+    def rotate(self):
+        copyblocks = copy_blocks(self.ownBlocks)
+        if (self.isRotated == 0):
+            copyblocks[2].move_up()
+            copyblocks[3].move_left().move_left().move_up()
+            copyrot = 1
+        elif(self.isRotated == 1):
+            copyblocks[2].move_down()
+            copyblocks[3].move_right().move_right().move_down()
+            copyrot = 0
+
+        if collision(copyblocks):
+            pass # add unpleasant sound
+        else:
+            self.ownBlocks = list(copyblocks)
+            self.isRotated = copyrot
+
+class FigureSm(Figure):
+    """docstring for FigureI"""
+    weight = WEIGHT_S
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 2))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
+
+    def rotate(self):
+        copyblocks = copy_blocks(self.ownBlocks)
+        if (self.isRotated == 0):
+            copyblocks[2].move_up()
+            copyblocks[3].move_right().move_right().move_up()
+            copyrot = 1
+        elif(self.isRotated == 1):
+            copyblocks[2].move_down()
+            copyblocks[3].move_left().move_left().move_down()
+            copyrot = 0
+
+        if collision(copyblocks):
+            pass # add unpleasant sound
+        else:
+            self.ownBlocks = list(copyblocks)
+            self.isRotated = copyrot
+
+class FigureSq(Figure):
+    """docstring for FigureSq"""
+    weight = WEIGHT_S
+    def __init__(self):
+        self.ownBlocks = []
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2, 1))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 0))
+        self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 1))
+        copyblocks = self.ownBlocks
+        if collision(copyblocks):
+            game_over()
+
+    def rotate(self):
+        pass #really pass
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+########################### END FIGURES ###########################
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 # 2.2########## Collision Detection #######
 def collision(copyblocks):
@@ -169,9 +366,10 @@ def collision(copyblocks):
 # 2.2########## HEAP #######
 def  heap_absorb(figure):
     global SCORE
+    global missile
     SCORE += figure.weight
     HEAP.extend(figure.ownBlocks)
-    new_random_figure_factory()
+    missile = new_random_figure_factory()
 
 def heap_checkline():
     pass
@@ -180,10 +378,6 @@ def game_over():
     global GAME_OVER
     GAME_OVER = True
 
-def new_random_figure_factory():
-    global missile
-    obj = random.choice([FigureT])
-    missile = obj()
 
 ##### UTIL #####
 """This is just for fine copy of figure`s array, to use copy, not original"""
@@ -192,7 +386,7 @@ def copy_blocks(ownblocks):
     for block in ownblocks:
             copyblocks.append(Block(block.x, block.y))
     return copyblocks
-
+# Game speed control FALSE == NEXT STEP
 def timer():
     global timeNow
     cur_time = libtcod.sys_elapsed_milli()
@@ -202,6 +396,19 @@ def timer():
         timeNow = cur_time
         return False
 
+# Making weightened array for random machine
+FIGARRAY = []
+
+FIGURES_IN_GAME = {FigureT : FREQ_T, FigureI : FREQ_I, FigureLm : FREQ_Lm,
+                   FigureL : FREQ_L, FigureS : FREQ_S, FigureSm : FREQ_Sm, FigureSq: FREQ_Sq}
+for k, v in FIGURES_IN_GAME.items():
+    for n in range(v):
+        FIGARRAY.append(k)
+
+
+def new_random_figure_factory():
+    obj = random.choice(FIGARRAY)
+    return obj()
 
 ######################################
 # 2 ########## Graphics ############
@@ -229,8 +436,8 @@ libtcod.console_init_root(SCREENWIDTH_X, SCREENHEIGHT_Y, 'snid1 supermegatetris'
 libtcod.sys_set_fps(LIMIT_FPS)
 timeNow = libtcod.sys_elapsed_milli()
 
-missile = FigureT()
-# Game speed control FALSE == NEXT STEP
+missile = new_random_figure_factory()
+
 
 # The Loop
 """TEST
