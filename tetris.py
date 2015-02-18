@@ -295,7 +295,7 @@ class FigureS(Figure):
 
 class FigureSm(Figure):
     """docstring for FigureI"""
-    weight = WEIGHT_S
+    weight = WEIGHT_Sm
     def __init__(self):
         self.ownBlocks = []
         self.ownBlocks.append(Block(SCREENWIDTH_X/2+1, 0))
@@ -325,7 +325,7 @@ class FigureSm(Figure):
 
 class FigureSq(Figure):
     """docstring for FigureSq"""
-    weight = WEIGHT_S
+    weight = WEIGHT_Sq
     def __init__(self):
         self.ownBlocks = []
         self.ownBlocks.append(Block(SCREENWIDTH_X/2, 0))
