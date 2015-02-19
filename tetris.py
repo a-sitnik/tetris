@@ -17,8 +17,8 @@ sys.path.append("python")
 import libtcodpy as libtcod
 # 1.1 ########## Settings ############
 # Game
-SCREENWIDTH_X = 20
-SCREENHEIGHT_Y = 30
+SCREENWIDTH_X = 12
+SCREENHEIGHT_Y = 20
 GAME_SPEED = 300
 WINSCORE = 3000
 # full list: [FigureT, FigureI, FigureLm, Figure L, FigureS, FigureSm, FigureSq]
@@ -369,10 +369,38 @@ def  heap_absorb(figure):
     global missile
     SCORE += figure.weight
     HEAP.extend(figure.ownBlocks)
+    ''''''
+    heap_checkline()
+    ''''''
     missile = new_random_figure_factory()
 
 def heap_checkline():
-    pass
+    HEAP
+    #checking every row
+    for row in range(SCREENHEIGHT_Y):
+        summb = 0
+        #counting how many blocks are there in row
+        for bl in HEAP:
+            if bl.y == row:
+                summb +=1
+        # if maximum^
+        #print summb
+        if summb >= SCREENWIDTH_X:
+            for bl in HEAP:
+                if bl.y == row:
+                    # we destroy row
+                    #del HEAP[bl]
+                    HEAP.remove(bl)
+                # and bring all higher blocks down
+            for bl in HEAP:
+                if bl.y < row:
+                    bl.move_down()
+
+def clean_heap():
+    global HEAP
+    cleaned = set(HEAP)
+    HEAP = list(cleaned)
+
 
 def game_over():
     global GAME_OVER
@@ -466,7 +494,7 @@ def game_window():
 while not libtcod.console_is_window_closed():
     game_window()
     missile.move_down()
-    heap_checkline()
+
     if GAME_OVER:
         word = "GAME OVER"
         word2 = "SCORE: " + str(SCORE)
