@@ -2,25 +2,26 @@
 
 import time
 import random
+from itertools import groupby
 import sys
 import os
 import platform
 if platform.system() == 'Windows':
-	os.chdir("libtcod-1.6.0-mingw32")
+    os.chdir("libtcod-1.6.0-mingw32")
 else:
-	if '32' in platform.architecture()[0]:
-		os.chdir("libtcod-1.6.0-linux32")
-	else:
-		os.chdir("libtcod-1.6.0-linux64")
+    if '32' in platform.architecture()[0]:
+        os.chdir("libtcod-1.6.0-linux32")
+    else:
+        os.chdir("libtcod-1.6.0-linux64")
 #os.chdir("libtcod-1.6.0-linux64")
 sys.path.append("python")
 import libtcodpy as libtcod
 # 1.1 ########## Settings ############
 # Game
-SCREENWIDTH_X = 12
-SCREENHEIGHT_Y = 20
+SCREENWIDTH_X = 16
+SCREENHEIGHT_Y = 24
 GAME_SPEED = 300
-WINSCORE = 3000
+WINSCORE = 600
 # full list: [FigureT, FigureI, FigureLm, Figure L, FigureS, FigureSm, FigureSq]
 
 FREQ_T = 3
@@ -375,31 +376,24 @@ def  heap_absorb(figure):
     missile = new_random_figure_factory()
 
 def heap_checkline():
-    HEAP
-    #checking every row
     for row in range(SCREENHEIGHT_Y):
-        summb = 0
+        blhigher = []
+        blocksrow = []
+        blockx = []
         #counting how many blocks are there in row
         for bl in HEAP:
             if bl.y == row:
-                summb +=1
-        # if maximum^
-        #print summb
-        if summb >= SCREENWIDTH_X:
-            for bl in HEAP:
-                if bl.y == row:
-                    # we destroy row
-                    #del HEAP[bl]
-                    HEAP.remove(bl)
-                # and bring all higher blocks down
-            for bl in HEAP:
-                if bl.y < row:
-                    bl.move_down()
+                blocksrow.append(bl)
+                blockx.append(bl.x)
+            if bl.y < row:
+                blhigher.append(bl)
 
-def clean_heap():
-    global HEAP
-    cleaned = set(HEAP)
-    HEAP = list(cleaned)
+        if set(sorted(blockx)) == set(range(SCREENWIDTH_X)):
+            for bl in blocksrow:
+                HEAP.remove(bl)
+                # and bring all higher blocks down
+            for bl in blhigher:
+                bl.move_down()
 
 
 def game_over():
@@ -494,6 +488,7 @@ def game_window():
 while not libtcod.console_is_window_closed():
     game_window()
     missile.move_down()
+    print SCORE
 
     if GAME_OVER:
         word = "GAME OVER"
