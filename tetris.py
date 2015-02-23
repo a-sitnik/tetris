@@ -488,7 +488,6 @@ def game_window():
 while not libtcod.console_is_window_closed():
     game_window()
     missile.move_down()
-    print SCORE
 
     if GAME_OVER:
         word = "GAME OVER"
